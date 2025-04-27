@@ -1,58 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lottie/lottie.dart';
 
-class UnlockScreen extends StatefulWidget {
-  const UnlockScreen({Key? key}) : super(key: key);
+class LockScreen extends StatefulWidget {
+  final String packageName;
+
+  const LockScreen({Key? key, required this.packageName}) : super(key: key);
 
   @override
-  _UnlockScreenState createState() => _UnlockScreenState();
+  _LockScreenState createState() => _LockScreenState();
 }
 
-class _UnlockScreenState extends State<UnlockScreen> {
+class _LockScreenState extends State<LockScreen> {
   final LocalAuthentication auth = LocalAuthentication();
   bool _isAuthenticating = false;
-  bool _hasFaceID = false;
+  String _packageName = '';
+  static const platform = MethodChannel('appLocker');
 
   @override
   void initState() {
     super.initState();
-    _checkFaceIDSupport();
+    _setupMethodChannel();
     _authenticate();
   }
 
-  Future<void> _checkFaceIDSupport() async {
-    try {
-      final List<BiometricType> availableBiometrics =
-      await auth.getAvailableBiometrics();
-      if (availableBiometrics.contains(BiometricType.face)) {
-        print('Face ID is available');
-        setState(() => _hasFaceID = true);
+  Future<void> _setupMethodChannel() async {
+    platform.setMethodHandler((call) async {
+      if (call.method == 'setPackageName') {
+        final packageName = call.arguments['packageName'] as String;
+        setState(() {
+          _packageName = packageName;
+        });
+        print('Package name set to: $_packageName');
       }
-    } catch (e) {
-      print('Error checking biometrics: $e');
-    }
+    });
   }
 
   Future<void> _authenticate() async {
-    if (_isAuthenticating) return;
+    if (_isAuthenticating || _packageName.isEmpty) {
+      print('Not authenticating: isAuthenticating=$_isAuthenticating, packageName=$_packageName');
+      return;
+    }
 
     setState(() => _isAuthenticating = true);
 
     try {
+      final availableBiometrics = await auth.getAvailableBiometrics();
+      print('Available biometrics: $availableBiometrics');
       final bool didAuthenticate = await auth.authenticate(
-        localizedReason: 'Unlock the app using ${_hasFaceID ? "Face ID" : "biometrics"}',
+        localizedReason: 'استخدم بصمة الوجه لفتح التطبيق',
         options: const AuthenticationOptions(
           useErrorDialogs: true,
           stickyAuth: true,
-          biometricOnly: true, // Ensures only biometric auth is used
+          biometricOnly: true,
         ),
-
       );
 
       if (didAuthenticate) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/home');
+          await platform.invokeMethod('openApp', {'packageName': _packageName});
+          Navigator.pop(context);
         }
       } else {
         if (mounted) {
@@ -60,6 +68,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
         }
       }
     } catch (e) {
+      print('Authentication error: $e');
       if (mounted) {
         _showErrorDialog();
       }
@@ -72,15 +81,15 @@ class _UnlockScreenState extends State<UnlockScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Authentication Failed'),
-        content: Text('Please try ${_hasFaceID ? "Face ID" : "biometrics"} again'),
+        title: const Text('فشل التأمين'),
+        content: const Text('حاول استخدام بصمة الوجه مرة أخرى'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _authenticate();
             },
-            child: const Text('Retry'),
+            child: const Text('إعادة المحاولة'),
           ),
         ],
       ),
@@ -89,36 +98,39 @@ class _UnlockScreenState extends State<UnlockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 200,
-              height: 200,
-              child: Lottie.asset(
-                'assets/face_id_animation.json',
-                repeat: true,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 200,
+                height: 200,
+                child: Lottie.asset(
+                  'assets/face_id_animation.json',
+                  repeat: true,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              _hasFaceID ? 'Unlock with Face ID' : 'Unlock with Biometrics',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 20),
+              const Text(
+                'افتح باستخدام بصمة الوجه',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            if (_isAuthenticating)
-              const CircularProgressIndicator()
-            else
-              ElevatedButton(
-                onPressed: _authenticate,
-                child: const Text('Try Again'),
-              ),
-          ],
+              const SizedBox(height: 20),
+              if (_isAuthenticating)
+                const CircularProgressIndicator()
+              else
+                ElevatedButton(
+                  onPressed: _authenticate,
+                  child: const Text('حاول مرة أخرى'),
+                ),
+            ],
+          ),
         ),
       ),
     );

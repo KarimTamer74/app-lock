@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/lock_screen.dart';
-import 'package:myapp/main_screen.dart';
+import 'main_screen.dart';
+import 'lock_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,11 +15,18 @@ class MyApp extends StatelessWidget {
       title: 'AppLocker',
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
-      routes: {
-        '/': (context) => const MainScreen(),
-        '/lock': (context) => LockScreen(
-          packageName: ModalRoute.of(context)!.settings.arguments as String,
-        ),
+      onGenerateRoute: (settings) {
+        if (settings.name != null && settings.name!.startsWith('/lock')) {
+          // Extract packageName from the route
+          final uri = Uri.parse(settings.name!);
+          final packageName = uri.queryParameters['packageName'] ?? '';
+          return MaterialPageRoute(
+            builder: (context) => LockScreen(packageName: packageName),
+          );
+        }
+        return MaterialPageRoute(
+          builder: (context) => const MainScreen(),
+        );
       },
     );
   }

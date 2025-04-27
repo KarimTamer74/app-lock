@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:device_apps/device_apps.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MainScreen extends StatefulWidget {
@@ -12,7 +13,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   List<Application> _apps = [];
   List<String> _lockedApps = [];
-
+  static const platform = MethodChannel('appLocker');
   @override
   void initState() {
     super.initState();
@@ -48,12 +49,24 @@ class _MainScreenState extends State<MainScreen> {
     });
     await prefs.setStringList('lockedApps', _lockedApps);
   }
-
+  Future<void> enableAccessibilityService() async {
+    try {
+      await platform.invokeMethod('enableAccessibility');
+      print('Accessibility service activation requested');
+    } catch (e) {
+      print('Error enabling accessibility: $e');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('اختار التطبيقات للقفل'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: enableAccessibilityService,
+        child: const Icon(Icons.accessibility),
+        tooltip: 'تفعيل خدمة الوصول',
       ),
       body: _apps.isEmpty
           ? const Center(child: CircularProgressIndicator())

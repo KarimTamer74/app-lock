@@ -1,5 +1,5 @@
-import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:lottie/lottie.dart';
 
@@ -15,51 +15,37 @@ class LockScreen extends StatefulWidget {
 class _LockScreenState extends State<LockScreen> {
   final LocalAuthentication auth = LocalAuthentication();
   bool _isAuthenticating = false;
-  bool _hasFaceID = false;
+  static const platform = MethodChannel('appLocker');
 
   @override
   void initState() {
     super.initState();
-    _checkFaceIDSupport();
     _authenticate();
   }
 
-  Future<void> _checkFaceIDSupport() async {
-    try {
-      final List<BiometricType> availableBiometrics =
-      await auth.getAvailableBiometrics();
-      print('Available biometrics: $availableBiometrics');
-      if (availableBiometrics.contains(BiometricType.face)) {
-        setState(() => _hasFaceID = true);
-      } else if (Theme.of(context).platform == TargetPlatform.iOS) {
-        setState(() => _hasFaceID = true); // Assume Face ID on iOS
-      }
-    } catch (e) {
-      print('Error checking biometrics: $e');
-    }
-  }
-
   Future<void> _authenticate() async {
-    if (_isAuthenticating) return;
+    if (_isAuthenticating || widget.packageName.isEmpty) {
+      print('Not authenticating: isAuthenticating=$_isAuthenticating, packageName=${widget.packageName}');
+      return;
+    }
 
     setState(() => _isAuthenticating = true);
 
     try {
+      final availableBiometrics = await auth.getAvailableBiometrics();
+      print('Available biometrics: $availableBiometrics');
       final bool didAuthenticate = await auth.authenticate(
-        localizedReason: 'استخدم Face ID لفتح التطبيق',
+        localizedReason: 'استخدم بصمة الوجه لفتح التطبيق',
         options: const AuthenticationOptions(
           useErrorDialogs: true,
           stickyAuth: true,
           biometricOnly: true,
         ),
-        authMessages: const [
-        ],
       );
 
       if (didAuthenticate) {
         if (mounted) {
-          // افتح التطبيق المقفول
-          await DeviceApps.openApp(widget.packageName);
+          await platform.invokeMethod('openApp', {'packageName': widget.packageName});
           Navigator.pop(context);
         }
       } else {
@@ -82,7 +68,7 @@ class _LockScreenState extends State<LockScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('فشل التأمين'),
-        content: const Text('حاول استخدام Face ID مرة أخرى'),
+        content: const Text('حاول استخدام بصمة الوجه مرة أخرى'),
         actions: [
           TextButton(
             onPressed: () {
@@ -99,7 +85,7 @@ class _LockScreenState extends State<LockScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false, // منع الرجوع بدون تأمين
+      onWillPop: () async => false,
       child: Scaffold(
         body: Center(
           child: Column(
@@ -114,9 +100,9 @@ class _LockScreenState extends State<LockScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(
-                _hasFaceID ? 'افتح باستخدام Face ID' : 'افتح باستخدام البصمة',
-                style: const TextStyle(
+              const Text(
+                'افتح باستخدام بصمة الوجه',
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
