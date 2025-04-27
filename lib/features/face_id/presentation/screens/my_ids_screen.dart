@@ -36,7 +36,7 @@ class _MyIdsScreenState extends State<MyIdsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'FaceID\'s Library',
       ),
       body: Container(

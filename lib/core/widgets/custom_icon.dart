@@ -6,10 +6,10 @@ class FaceIdCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const FaceIdCard({
-    Key? key,
+    super.key,
     required this.name,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

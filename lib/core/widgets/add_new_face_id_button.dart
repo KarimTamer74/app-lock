@@ -5,9 +5,9 @@ class AddNewFaceIdButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const AddNewFaceIdButton({
-    Key? key,
+    super.key,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

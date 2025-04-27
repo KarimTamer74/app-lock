@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:myapp/features/face_id/presentation/screens/app_screen.dart';
 import 'package:myapp/features/face_id/presentation/screens/docs_screen.dart';
