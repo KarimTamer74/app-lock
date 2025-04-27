@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/face_id/presentation/screens/face_id_list_screen.dart';
-import '../../features/docs/presentation/screens/docs_screen.dart';
-import '../../features/app/presentation/screens/app_screen.dart';
-import '../../features/splash/presentation/screens/splash_screen.dart';
+import 'package:myapp/features/face_id/presentation/screens/app_screen.dart';
+import 'package:myapp/features/face_id/presentation/screens/docs_screen.dart';
+import 'package:myapp/features/face_id/presentation/screens/my_ids_screen.dart';
+
 
 class AppRouter {
   static const String splashRoute = '/';
@@ -14,13 +14,13 @@ class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: splashRoute,
     routes: [
-      GoRoute(
-        path: splashRoute,
-        builder: (context, state) => const SplashScreen(),
-      ),
+      // GoRoute(
+      //   path: splashRoute,
+      //   builder: (context, state) => const SplashScreen(),
+      // ),
       GoRoute(
         path: faceIdListRoute,
-        builder: (context, state) => const FaceIdListScreen(),
+        builder: (context, state) => const MyIdsScreen(),
       ),
       GoRoute(
         path: docsRoute,

@@ -35,13 +35,13 @@ class CustomNavigationBar extends StatelessWidget {
 
   int _calculateSelectedIndex(BuildContext context) {
     final String location = currentRoute;
-    if (location.startsWith(AppRouter.myIdsScreen)) {
+    if (location.startsWith(AppRouter.faceIdListRoute)) {
       return 0;
     }
-    if (location.startsWith(AppRouter.docsScreen)) {
+    if (location.startsWith(AppRouter.docsRoute)) {
       return 1;
     }
-    if (location.startsWith(AppRouter.appScreen)) {
+    if (location.startsWith(AppRouter.appRoute)) {
       return 2;
     }
     return 0;
@@ -50,13 +50,13 @@ class CustomNavigationBar extends StatelessWidget {
   void _onItemTapped(int index, BuildContext context) {
     switch (index) {
       case 0:
-        GoRouter.of(context).go(AppRouter.myIdsScreen);
+        GoRouter.of(context).go(AppRouter.faceIdListRoute);
         break;
       case 1:
-        GoRouter.of(context).go(AppRouter.docsScreen);
+        GoRouter.of(context).go(AppRouter.docsRoute);
         break;
       case 2:
-        GoRouter.of(context).go(AppRouter.appScreen);
+        GoRouter.of(context).go(AppRouter.appRoute);
         break;
     }
   }

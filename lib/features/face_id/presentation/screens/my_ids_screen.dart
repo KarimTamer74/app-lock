@@ -24,11 +24,11 @@ class _MyIdsScreenState extends State<MyIdsScreen> {
     setState(() {
       _selectedIndex = index;
       if (index == 0) {
-        context.go(AppRouter.myIdsScreen);
+        context.go(AppRouter.faceIdListRoute);
       } else if (index == 1) {
-        context.go(AppRouter.docsScreen);
+        context.go(AppRouter.docsRoute);
       } else if (index == 2) {
-        context.go(AppRouter.appScreen);
+        context.go(AppRouter.appRoute);
       }
     });
   }

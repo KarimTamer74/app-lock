@@ -5,4 +5,5 @@ class AppConstants {
   static const Color secondaryColor = Color(0xFF4DD0E1);
   static const Color accentColor = Color(0xFF26C6DA);
   static const Color backgroundColor = Color(0xFFBBDEFB);
-  static const Color textColor = Color(0
+
+}
