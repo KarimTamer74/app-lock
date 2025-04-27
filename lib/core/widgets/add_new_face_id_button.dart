@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+import '../utils/app_colors.dart';
+import 'face_id_icon.dart';
 
 class AddNewFaceIdButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -16,31 +18,31 @@ class AddNewFaceIdButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
+          backgroundColor: AppColors.lightGray,
+          foregroundColor: AppColors.textColor,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              'assets/icons/face_id.svg',
-              height: 24,
-              width: 24,
+            FaceIdIcon(
+              color: AppColors.textColor,
+              size: 24,
             ),
-            const SizedBox(width: 10),
-            const Text(
+            SizedBox(width: 10),
+            Text(
               'Add new FaceID',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
+                color: AppColors.textColor
               ),
             ),
-            const SizedBox(width: 10),
-            const Icon(Icons.add, size: 24),
+            SizedBox(width: 10),
+            Icon(Icons.add, size: 24, color: AppColors.textColor),
           ],
         ),
       ),

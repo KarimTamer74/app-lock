@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/core/routes/app_router.dart';
+import 'package:myapp/core/utils/app_colors.dart';
+import 'package:myapp/core/widgets/navigation_bar.dart';
+import 'package:myapp/features/face_id/presentation/screens/splash_screen.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Face ID App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+        primaryColor: AppColors.primaryColor,
+        colorScheme: const ColorScheme.light().copyWith(primary: AppColors.primaryColor),
       ),
       home: SplashScreen(),
     );

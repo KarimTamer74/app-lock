@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+import '../utils/app_colors.dart';
+import '../utils/constants.dart';
+import 'delete_icon.dart';
 
 class FaceIdCard extends StatelessWidget {
   final String name;
@@ -14,30 +17,31 @@ class FaceIdCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.blue[100],
+      color: AppColors.lightBlue,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            SvgPicture.asset(
-              'assets/icons/face_id_icon.svg', // Replace with your icon path
+            const Icon(
+              Icons.face,
               width: 30,
               height: 30,
+              color: AppColors.iconColor,
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 name,
                 style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
+                    fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textColor),
               ),
             ),
-            IconButton(
-              icon: SvgPicture.asset('assets/icons/delete_icon.svg'), // Replace with your delete icon path
-              onPressed: onDelete,
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: IconButton(
+                onPressed: onDelete, icon: const DeleteIcon(),
+              ),
             ),
           ],
         ),
