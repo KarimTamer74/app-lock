@@ -8,6 +8,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.content.Context
 import android.util.Log
 import org.json.JSONArray
+import com.example.myapp.MainActivity
 
 class AppLockService : AccessibilityService() {
     private val TAG = "AppLockService"
