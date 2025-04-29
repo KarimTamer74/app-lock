@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
@@ -14,8 +16,10 @@ class LockScreen extends StatefulWidget {
 
 class _LockScreenState extends State<LockScreen> {
   final LocalAuthentication auth = LocalAuthentication();
-  bool _isAuthenticating = false;
   static const platform = MethodChannel('appLocker');
+  static const serviceChannel = MethodChannel(
+      'appLockServiceChannel'); // ✅ قناة جديدة للتواصل مع AppLockService
+  bool _isAuthenticating = false;
 
   @override
   void initState() {
@@ -25,28 +29,32 @@ class _LockScreenState extends State<LockScreen> {
 
   Future<void> _authenticate() async {
     if (_isAuthenticating || widget.packageName.isEmpty) {
-      print('Not authenticating: isAuthenticating=$_isAuthenticating, packageName=${widget.packageName}');
+      print(
+          'Not authenticating: isAuthenticating=$_isAuthenticating, packageName=${widget.packageName}');
       return;
     }
 
     setState(() => _isAuthenticating = true);
 
     try {
-      final availableBiometrics = await auth.getAvailableBiometrics();
-      print('Available biometrics: $availableBiometrics');
       final bool didAuthenticate = await auth.authenticate(
-        localizedReason: 'استخدم بصمة الوجه لفتح التطبيق',
+        localizedReason: 'ادخل بصمة الاصبع او رمز المرور لفتح التطبيق',
         options: const AuthenticationOptions(
           useErrorDialogs: true,
           stickyAuth: true,
-          biometricOnly: true,
+          biometricOnly: false,
         ),
       );
 
       if (didAuthenticate) {
         if (mounted) {
-          await platform.invokeMethod('openApp', {'packageName': widget.packageName});
-          Navigator.pop(context);
+          try {
+            await platform
+                .invokeMethod('openApp', {'packageName': widget.packageName});
+          } on PlatformException catch (e) {
+            print("Failed to open app: $e");
+          }
+          _unlockAndExit();
         }
       } else {
         if (mounted) {
@@ -63,19 +71,37 @@ class _LockScreenState extends State<LockScreen> {
     }
   }
 
+  Future<void> _unlockAndExit() async {
+    try {
+      await serviceChannel.invokeMethod(
+          'resetLockScreenState'); // ✅ نادينا على الخدمة ترجّع isLockScreenActive = false
+    } catch (e) {
+      log('Failed to reset lock screen state: $e');
+    }
+    Navigator.pop(context); // ✅ قفل شاشة القفل
+  }
+
   void _showErrorDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('فشل التأمين'),
-        content: const Text('حاول استخدام بصمة الوجه مرة أخرى'),
+        content: const Text('البصمة أو رمز المرور غير صحيح. حاول مرة أخرى.'),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              _authenticate();
+              Navigator.pop(context); // اغلاق الرسالة
+              _authenticate(); // حاول تاني
             },
             child: const Text('إعادة المحاولة'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // اغلاق الرسالة
+              _unlockAndExit(); // قفل شاشة القفل وخبر الخدمة
+            },
+            child: const Text('إلغاء'),
           ),
         ],
       ),
